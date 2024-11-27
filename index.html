@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Verification</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #4338ca;
+            color: #b3b3b3;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.219);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+        h2 {
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .grid-item {
+            position: relative;
+            aspect-ratio: 1;
+            cursor: pointer;
+            border: 3px solid rgba(33, 150, 243, 0.4);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .grid-item:hover img {
+            transform: scale(1.05);
+        }
+        .grid-item.selected {
+            border-color: #21def3;
+            box-shadow: 0 0 8px rgba(33, 150, 243, 0.8);
+        }
+        .grid-item.selected::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1.5rem;
+        }
+        #verifyBtn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        #verifyBtn:disabled {
+            background-color: #00305f;
+            cursor: not-allowed;
+        }
+        #verifyBtn:hover:enabled {
+            background-color: #0051a2;
+        }
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .success {
+            color: #388E3C;
+        }
+        .error {
+            color: #D32F2F;
+        }
+        #instructionText {
+            font-size: 1rem;
+            color: #d2d2d2;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                height: auto;
+                padding: 20px 10px;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Image Verification</h2>
+        <p id="instructionText">Select 3 images that match the category</p>
+        <div class="grid" id="imageGrid"></div>
+        <button id="verifyBtn" disabled>Verify</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // Local image URLs - replace these with your own local image paths
+        const placeholderImages = [
+            'images/image1.jpg', // Replace with actual image paths
+            'images/image2.jpg',
+            'images/image3.jpg',
+            'images/image4.jpg',
+            'images/image5.jpg',
+            'images/image6.jpg',
+            'images/image7.jpg',
+            'images/image8.jpg',
+            'images/image9.jpg'
+        ];
+
+        // Configuration - you can customize these
+        const REQUIRED_SELECTIONS = 3;
+        const CORRECT_IMAGE_INDICES = [0, 3, 6]; // Indices of correct images
+
+        // Elements
+        const imageGrid = document.getElementById('imageGrid');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const messageDiv = document.getElementById('message');
+        const instructionText = document.getElementById('instructionText');
+
+        // Shuffle function to randomize image order
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Create image grid
+        function createImageGrid() {
+            shuffle(placeholderImages);
+            imageGrid.innerHTML = '';
+            placeholderImages.forEach((src, index) => {
+                const gridItem = document.createElement('div');
+                gridItem.classList.add('grid-item');
+                
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `Image ${index + 1}`;
+                
+                gridItem.appendChild(img);
+                gridItem.addEventListener('click', () => toggleImageSelection(gridItem));
+                gridItem.addEventListener('touchstart', () => {
+                    gridItem.classList.add('touched');
+                });
+                gridItem.addEventListener('touchend', () => {
+                    gridItem.classList.remove('touched');
+                });
+                imageGrid.appendChild(gridItem);
+            });
+        }
+
+        // Toggle image selection
+        function toggleImageSelection(gridItem) {
+            const selectedItems = document.querySelectorAll('.grid-item.selected');
+            
+            if (gridItem.classList.contains('selected')) {
+                gridItem.classList.remove('selected');
+            } else if (selectedItems.length < REQUIRED_SELECTIONS) {
+                gridItem.classList.add('selected');
+            }
+
+            instructionText.textContent = `Select ${REQUIRED_SELECTIONS - selectedItems.length -1} more images`;
+            if (selectedItems.length === REQUIRED_SELECTIONS) {
+                instructionText.textContent = 'Click "Verify" to check your selections.';
+            }
+
+            updateVerifyButton();
+        }
+
+        // Update verify button state
+        function updateVerifyButton() {
+            const selectedItems = document.querySelectorAll('.grid-item.selected');
+            verifyBtn.disabled = selectedItems.length !== REQUIRED_SELECTIONS;
+        }
+
+        // Verify selection
+        function verifySelection() {
+            const selectedItems = document.querySelectorAll('.grid-item.selected');
+            const selectedIndices = Array.from(selectedItems).map(item => 
+                Array.from(imageGrid.children).indexOf(item)
+            );
+
+            // Check if selected indices match the correct indices
+            const isCorrect = CORRECT_IMAGE_INDICES.every(correctIndex => 
+                selectedIndices.includes(correctIndex)
+            );
+
+            if (isCorrect) {
+                messageDiv.textContent = 'Verification Successful!';
+                messageDiv.classList.add('success');
+                setTimeout(() => {
+                    messageDiv.textContent = '';
+                    messageDiv.classList.remove('success');
+                    // update local storage that user is verified
+                    localStorage.setItem('verified', 'true');
+                    // Redirect to the next page
+                    window.location.href = 'index2.html';
+                 
+                   
+                    
+
+
+                }, 1500);
+            } else {
+                messageDiv.textContent = 'Incorrect selection. Please try again.';
+                messageDiv.classList.add('error');
+                setTimeout(resetGrid, 1500);
+            }
+        }
+
+        // Reset grid
+        function resetGrid() {
+            const selectedItems = document.querySelectorAll('.grid-item.selected');
+            selectedItems.forEach(item => item.classList.remove('selected'));
+            messageDiv.textContent = '';
+            messageDiv.classList.remove('success', 'error');
+            updateVerifyButton();
+        }
+
+        // Initialize
+        createImageGrid();
+        verifyBtn.addEventListener('click', verifySelection);
+    </script>
+</body>
+</html>
