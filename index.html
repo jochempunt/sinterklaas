@@ -112,7 +112,7 @@
 <body>
     <div class="container">
         <h2>Image Verification</h2>
-        <p id="instructionText">Select 3 images that match the category</p>
+        <p id="instructionText">Select the 3 dutch words that are real</p>
         <div class="grid" id="imageGrid"></div>
         <button id="verifyBtn" disabled>Verify</button>
         <div id="message"></div>
@@ -121,20 +121,20 @@
     <script>
         // Local image URLs - replace these with your own local image paths
         const placeholderImages = [
-            'images/image1.jpg', // Replace with actual image paths
-            'images/image2.jpg',
-            'images/image3.jpg',
-            'images/image4.jpg',
-            'images/image5.jpg',
-            'images/image6.jpg',
-            'images/image7.jpg',
-            'images/image8.jpg',
-            'images/image9.jpg'
+            'images/h.png', // Replace with actual image paths
+            'images/f.png',
+            'images/f2.png',
+            'images/f6.png',
+            'images/f3.png',
+            'images/k.png',
+            'images/g.png',
+            'images/f4.png',
+            'images/f5.png'
         ];
 
         // Configuration - you can customize these
         const REQUIRED_SELECTIONS = 3;
-        const CORRECT_IMAGE_INDICES = [0, 3, 6]; // Indices of correct images
+        const CORRECT_IMAGE_INDICES = [0,5 ,6]; // Indices of correct images
 
         // Elements
         const imageGrid = document.getElementById('imageGrid');
@@ -142,17 +142,11 @@
         const messageDiv = document.getElementById('message');
         const instructionText = document.getElementById('instructionText');
 
-        // Shuffle function to randomize image order
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
+
 
         // Create image grid
         function createImageGrid() {
-            shuffle(placeholderImages);
+           
             imageGrid.innerHTML = '';
             placeholderImages.forEach((src, index) => {
                 const gridItem = document.createElement('div');
@@ -211,7 +205,7 @@
             );
 
             if (isCorrect) {
-                messageDiv.textContent = 'Verification Successful!';
+                messageDiv.textContent = 'Verification Successful, good job :)';
                 messageDiv.classList.add('success');
                 setTimeout(() => {
                     messageDiv.textContent = '';
@@ -227,7 +221,7 @@
 
                 }, 1500);
             } else {
-                messageDiv.textContent = 'Incorrect selection. Please try again.';
+                messageDiv.textContent = 'Incorrect selection, Please try again.';
                 messageDiv.classList.add('error');
                 setTimeout(resetGrid, 1500);
             }
