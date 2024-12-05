@@ -5,27 +5,34 @@ const poemContainer = document.getElementById("poem-container");
 const poemOutput = document.getElementById("poem-output");
 const referenceSection = document.querySelector(".reference");
 
-// Poem content
 const poemLines = [
-  "In the quantum realm of thought you shine, \n",
-  "Decoding knowledge line by line \n ",
-  "Your research sparks a brilliant mind \n",
-  "Happy Birthday  best of !",
-  "PhD warrior, data's great ,",
-  "Illuminating research's .",
-  "Another year of genius ,",
-  "Your insights reshape the world! 🎓🔬"
+  "Dear Xin, <br>",
+  "It is for <span class='clickable' data-tooltip='Sinterklaas'>me</span> the first time I'm reading about you in  <span class='clickable' data-tooltip='my famous thick book were i have information about every person'>mijn dikke boek.</span><br>",
+  "I hear you come from a place afar, that is not  <span class='clickable' data-tooltip='around the corner'>om de hoek.</span><br>",
+  "Sint never has been to China before, so once you arrived Maastricht, he became aware of you.<br><br>",
+  "I hear you are together with  <span class='clickable' data-tooltip='handsome young man'>Jochem</span>,<br>",
+  "And before you only could meet him a few times,<br>",
+  "But now since he lives closer, it's easier for you to see him kochem<br>",
+  "And he hears he is so happy and lucky<br>",
+  "To share with you laughter, liefde, and soms even rhymes<br><br>",
+  "Now apart from that, you were quite busy this jaar,<br>",
+  "Reading and studying, je doet het zo maar.<br>",
+  "In the library, at home,  <span class='clickable' data-tooltip='it doesnt matter where'>het maakt niet uit waar.</span><br>",
+  "Writing papers about rare cancers and patient data,<br>",
+  "Arguing with professors, want <span class='clickable' data-tooltip='\"they know better\"'>'zij weten het beter'</span><br><br>",
+  "You are even working on learning Dutch, although it is quite hard,<br>",
+  "Pronouncing <span class='clickable' data-tooltip='Your duolingo stats are also quite impressive'>uil</span> is still tricky, but you're making it happen, with guard!<br> <br>",
+  "And on the side you're learning about western anatomy terms,<br>",
+  "About brain parts, bones, muscles, and nerves.<br>",
+  "This is why Sint thought he might buy you a gift.<br>",
+  "To help with your learning and give you a shift.<br>",
+  "Now enjoy your time with your gifts and celebrate well.<br><br>",
+  "Sint & G-Piet-T<br>" ,
+  "<i>(this poem was completely handwritten by Sint, but spelling was checked by ChatGPT)<i>"
 ];
 
-
-// if local storaage "verified" is not set, redirect to login page
-if (!localStorage.getItem("verified")) {
-  window.location.href = "index.html";
-}
-
-
 // Add form submit event listener
-form.addEventListener("submit", function (e) {
+document.getElementById("research-form").addEventListener("submit", function (e) {
   e.preventDefault(); // Prevent form from refreshing the page
   const queryInput = document.getElementById("query-input").value;
 
@@ -35,33 +42,21 @@ form.addEventListener("submit", function (e) {
   }
 
   // Show loading animation and hide others
-  loadingContainer.classList.remove("hidden");
-  poemContainer.classList.add("hidden");
-  referenceSection.classList.add("hidden");
-  poemOutput.innerHTML = ""; // Clear previous content
+  document.getElementById("loading-container").classList.remove("hidden");
+  document.getElementById("poem-container").classList.add("hidden");
+  document.querySelector(".reference").classList.add("hidden");
+  document.getElementById("poem-output").innerHTML = ""; // Clear previous content
 
   // Simulate a 5-second loading period
   setTimeout(() => {
-    loadingContainer.classList.add("hidden"); // Hide loading
-    poemContainer.classList.remove("hidden"); // Show the poem
+    document.getElementById("loading-container").classList.add("hidden"); // Hide loading
+    document.getElementById("poem-container").classList.remove("hidden"); // Show the poem
 
-    // Combine poem lines into one string and split by words
-    const poemWords = poemLines.join(" \n").split(" ");
-    let index = 0;
+    // Insert the poem directly without splitting words
+    let poemContent = poemLines.join(" "); // Combine lines into one string
+    document.getElementById("poem-output").innerHTML = poemContent; // Insert HTML content
 
-    // Display words one by one
-    const interval = setInterval(() => {
-      if (index < poemWords.length) {
-        if (poemWords[index] === "\n") {
-          poemOutput.innerHTML += "<br>";
-        } else {
-          poemOutput.innerHTML += poemWords[index] + " ";
-        }
-        index++;
-      } else {
-        clearInterval(interval); // Stop when done
-        referenceSection.classList.remove("hidden"); // Show references
-      }
-    }, 100); // Adjust speed as desired // Adjust speed as desired
-  }, 1000);
+    // Display references after poem is shown
+    document.querySelector(".reference").classList.remove("hidden"); // Show references
+  }, 3000);
 });

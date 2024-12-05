@@ -177,6 +177,31 @@ body {
   margin-top: 1.5rem;
 }
 
+.clickable {
+  font-style: italic;
+  cursor: pointer;
+  text-align: left;
+  color: rgb(255, 255, 255);
+  position: relative;
+  border-bottom: 2px dotted #ffffff; /* 2px dotted black underline */
+    padding-bottom: 2px; /* Adjust padding to avoid text overlap with the underline */
+}
+
+.clickable:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 14px;
+  top: 20px;
+  left: 0;
+  z-index: 10;
+  width: max-content;
+}
+
+
 /* Responsive Design */
 @media screen and (max-width: 480px) {
   .container {
