@@ -3,7 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Verification</title>
+    <title>Text Verification</title>
+
+</head>
+<body>
+    
+    <div class="container">
+        <h1>Verification</h1>
+        <h2>Select all <b>Body Parts/ Anatomical Structures</b></h2>
+        <p id="instructionText">Select the 3 body parts from the list below</p>
+        <div class="grid" id="textGrid"></div>
+        <button id="verifyBtn" disabled>Verify</button>
+        <div id="message"></div>
+    </div>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -12,15 +24,26 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #4338ca;
+            background: linear-gradient(to bottom right, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
             color: #b3b3b3;
+        }
+        :root {
+            --bg-gradient-start: #1e3a8a;
+    --bg-gradient-mid: #4338ca;
+    --bg-gradient-end: #312e81;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #ffffff;
+            padding:0;
+            margin: 0;
         }
         .container {
             background-color: rgba(255, 255, 255, 0.219);
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            height: 500px;
+            height: 600px;
             width: 100%;
             max-width: 350px;
             text-align: center;
@@ -43,15 +66,15 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
             border-radius: 8px;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background-color: #f0f0f0;
+            color: black;
         }
-        .grid-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        .grid-item:hover img {
-            transform: scale(1.05);
+        .grid-item:hover {
+            background-color: #e0e0e0;
         }
         .grid-item.selected {
             border-color: #21def3;
@@ -59,11 +82,11 @@
         }
         .grid-item.selected::after {
             content: '✓';
-            color: white;
+            color: rgb(87, 87, 87);
             position: absolute;
             top: 5px;
             right: 5px;
-            font-size: 1.5rem;
+            font-size: 1rem;
         }
         #verifyBtn {
             background-color: #2196F3;
@@ -91,6 +114,16 @@
         .success {
             color: #388E3C;
         }
+
+        .selected.success-border {
+            border-color: #388E3C;
+            box-shadow: 0 0 8px rgba(179, 255, 242, 0.8);
+        }
+
+        .selected.error-border {
+            border-color: #D32F2F;
+            box-shadow: 0 0 8px rgba(255, 152, 191, 0.8);
+        }
         .error {
             color: #D32F2F;
         }
@@ -108,137 +141,127 @@
 
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Image Verification</h2>
-        <p id="instructionText">Select the 3 dutch words that are real</p>
-        <div class="grid" id="imageGrid"></div>
-        <button id="verifyBtn" disabled>Verify</button>
-        <div id="message"></div>
-    </div>
+<script>
+    // List of terms (both body parts and non-body parts)
+    const terms = [
+        'Femur',   // Body part
+        'Carcinoma',  // Illness
+        'Trachea', // Body part
+        'Pneumonia', // Illness
+        'Pons',   // Body part
+        'Gastroenteritis',     // Illness
+        'Hernia',   // Illness
+        'Sarcoma', // Illness
+        'Kidney'   // Body part
+    ];
 
-    <script>
-        // Local image URLs - replace these with your own local image paths
-        const placeholderImages = [
-            'images/h.png', // Replace with actual image paths
-            'images/f.png',
-            'images/f2.png',
-            'images/f6.png',
-            'images/f3.png',
-            'images/k.png',
-            'images/g.png',
-            'images/f4.png',
-            'images/f5.png'
-        ];
+    // Configuration
+    const MIN_SELECTIONS = 1;
+    const MAX_SELECTIONS = 9;
+    const CORRECT_TERMS = ['Femur', 'Trachea', 'Pons', 'Kidney']; // Correct body parts
 
-        // Configuration - you can customize these
-        const REQUIRED_SELECTIONS = 3;
-        const CORRECT_IMAGE_INDICES = [0,5 ,6]; // Indices of correct images
+    // Elements
+    const textGrid = document.getElementById('textGrid');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const messageDiv = document.getElementById('message');
+    const instructionText = document.getElementById('instructionText');
 
-        // Elements
-        const imageGrid = document.getElementById('imageGrid');
-        const verifyBtn = document.getElementById('verifyBtn');
-        const messageDiv = document.getElementById('message');
-        const instructionText = document.getElementById('instructionText');
+    // Create text grid
+    function createTextGrid() {
+        textGrid.innerHTML = '';
+        terms.forEach(term => {
+            const gridItem = document.createElement('div');
+            gridItem.classList.add('grid-item');
+            gridItem.textContent = term;
 
+            gridItem.addEventListener('click', () => toggleTextSelection(gridItem));
+            gridItem.addEventListener('touchstart', () => gridItem.classList.add('touched'));
+            gridItem.addEventListener('touchend', () => gridItem.classList.remove('touched'));
+            textGrid.appendChild(gridItem);
+        });
+    }
 
+    // Toggle text selection
+    function toggleTextSelection(gridItem) {
+        const selectedItems = document.querySelectorAll('.grid-item.selected');
 
-        // Create image grid
-        function createImageGrid() {
-           
-            imageGrid.innerHTML = '';
-            placeholderImages.forEach((src, index) => {
-                const gridItem = document.createElement('div');
-                gridItem.classList.add('grid-item');
-                
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = `Image ${index + 1}`;
-                
-                gridItem.appendChild(img);
-                gridItem.addEventListener('click', () => toggleImageSelection(gridItem));
-                gridItem.addEventListener('touchstart', () => {
-                    gridItem.classList.add('touched');
-                });
-                gridItem.addEventListener('touchend', () => {
-                    gridItem.classList.remove('touched');
-                });
-                imageGrid.appendChild(gridItem);
-            });
+        if (gridItem.classList.contains('selected')) {
+            gridItem.classList.remove('selected');
+        } else if (selectedItems.length < MAX_SELECTIONS) {
+            gridItem.classList.add('selected');
         }
 
-        // Toggle image selection
-        function toggleImageSelection(gridItem) {
-            const selectedItems = document.querySelectorAll('.grid-item.selected');
-            
-            if (gridItem.classList.contains('selected')) {
-                gridItem.classList.remove('selected');
-            } else if (selectedItems.length < REQUIRED_SELECTIONS) {
-                gridItem.classList.add('selected');
+        const remainingSelections = MAX_SELECTIONS - selectedItems.length - 1;
+        instructionText.textContent = `Select ${remainingSelections} more body parts`;
+
+        if (selectedItems.length >= MIN_SELECTIONS) {
+            instructionText.textContent = 'Click "Verify" to check your selections.';
+        }
+
+        updateVerifyButton();
+    }
+
+    // Update verify button state
+    function updateVerifyButton() {
+        const selectedItems = document.querySelectorAll('.grid-item.selected');
+        verifyBtn.disabled = selectedItems.length < MIN_SELECTIONS;
+    }
+
+    // Verify selection
+    function verifySelection() {
+        const selectedItems = document.querySelectorAll('.grid-item.selected');
+        const selectedTerms = Array.from(selectedItems).map(item => item.textContent);
+
+        console.log('Selected Terms:', selectedTerms);
+        console.log('Correct Terms:', CORRECT_TERMS);
+
+        const isCorrect = selectedTerms.every(term => CORRECT_TERMS.includes(term)) && selectedTerms.length === CORRECT_TERMS.length;
+
+        if (isCorrect) {
+            messageDiv.textContent = 'Verification Successful, good job :)';
+            messageDiv.classList.add('success');
+            colorSelectedTexts(true);
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.classList.remove('success');
+                // update local storage that user is verified
+                localStorage.setItem('verified', 'true');
+                // Redirect to the next page
+                window.location.href = './duo/duolingo.html';
+            }, 1500);
+        } else {
+            messageDiv.textContent = 'Incorrect selection, Please try again.';
+            messageDiv.classList.add('error');
+            colorSelectedTexts(false);
+            setTimeout(resetGrid, 1500);
+        }
+    }
+
+    function colorSelectedTexts(isCorrect){
+        const selectedItems = document.querySelectorAll('.grid-item.selected');
+        selectedItems.forEach(item => {
+            if(isCorrect){
+                item.classList.add('success-border');
+            }else{
+                item.classList.add('error-border');
             }
+        });
+    }
 
-            instructionText.textContent = `Select ${REQUIRED_SELECTIONS - selectedItems.length -1} more images`;
-            if (selectedItems.length === REQUIRED_SELECTIONS) {
-                instructionText.textContent = 'Click "Verify" to check your selections.';
-            }
+    // Reset grid
+    function resetGrid() {
+        const selectedItems = document.querySelectorAll('.grid-item.selected');
+        selectedItems.forEach(item => item.classList.remove('selected'));
+        selectedItems.forEach(item => item.classList.remove('error-border'));
+        messageDiv.textContent = '';
+        messageDiv.classList.remove('success', 'error');
+        updateVerifyButton();
+    }
 
-            updateVerifyButton();
-        }
+    // Initialize
+    createTextGrid();
+    verifyBtn.addEventListener('click', verifySelection);
+</script>
 
-        // Update verify button state
-        function updateVerifyButton() {
-            const selectedItems = document.querySelectorAll('.grid-item.selected');
-            verifyBtn.disabled = selectedItems.length !== REQUIRED_SELECTIONS;
-        }
-
-        // Verify selection
-        function verifySelection() {
-            const selectedItems = document.querySelectorAll('.grid-item.selected');
-            const selectedIndices = Array.from(selectedItems).map(item => 
-                Array.from(imageGrid.children).indexOf(item)
-            );
-
-            // Check if selected indices match the correct indices
-            const isCorrect = CORRECT_IMAGE_INDICES.every(correctIndex => 
-                selectedIndices.includes(correctIndex)
-            );
-
-            if (isCorrect) {
-                messageDiv.textContent = 'Verification Successful, good job :)';
-                messageDiv.classList.add('success');
-                setTimeout(() => {
-                    messageDiv.textContent = '';
-                    messageDiv.classList.remove('success');
-                    // update local storage that user is verified
-                    localStorage.setItem('verified', 'true');
-                    // Redirect to the next page
-                    window.location.href = 'index2.html';
-                 
-                   
-                    
-
-
-                }, 1500);
-            } else {
-                messageDiv.textContent = 'Incorrect selection, Please try again.';
-                messageDiv.classList.add('error');
-                setTimeout(resetGrid, 1500);
-            }
-        }
-
-        // Reset grid
-        function resetGrid() {
-            const selectedItems = document.querySelectorAll('.grid-item.selected');
-            selectedItems.forEach(item => item.classList.remove('selected'));
-            messageDiv.textContent = '';
-            messageDiv.classList.remove('success', 'error');
-            updateVerifyButton();
-        }
-
-        // Initialize
-        createImageGrid();
-        verifyBtn.addEventListener('click', verifySelection);
-    </script>
 </body>
 </html>
